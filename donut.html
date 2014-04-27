@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+<title>Doughnut Chart</title>
+<script src="donutClock.js"></script>
+<meta name = "viewport" content = "initial-scale = 1, user-scalable = no">
+<style>
+canvas{
+}
+</style>
+</head>
+<body>
+<canvas id="canvas" height="200" width="200"></canvas>
+
+
+<script>
+
+var donutData = {
+	hours	: 12,
+	minutes	: 0,
+	seconds	: 60
+};
+
+var donutOptions = { 
+	segmentShowStroke: true,
+	mStrokeColor: "#fff",
+	hStrokeColor: "#fff",
+	segmentStrokeWidth: 2,
+	percentageInnerCutout: 50,
+	animation: false,
+	mcolor	: "#A69DFF",
+	hColor	: "#3D33A6",
+	sColor	: "#D65E78",
+	bgColor	: "rgba(188, 181, 255, 0.5)",
+	hSep	: 3,
+	hHeight	: 20,
+	sSep	: 3,
+	sHeight	:10,
+	outerRadius : 75
+};
+
+var canvas = document.getElementById("canvas");
+var context = canvas.getContext("2d");
+var chart = new Chart(context);
+var myDonut = chart.donutClock(donutData, donutOptions);
+
+
+setInterval(function(){
+	var currentdate = new Date(); 
+	donutData = {
+		hours : currentdate.getHours(),
+		minutes:currentdate.getMinutes(),
+		seconds: currentdate.getSeconds(),	
+		color	: "#F7464A",
+		hColor	: "#46BFBD",
+		sColor	: "#FDB45C",
+		bgColor	: "rgba(0, 255, 0, 0.5)"
+	};
+	myDonut = chart.donutClock(donutData, donutOptions);
+},1000);
+
+</script>
+</body>
+</html>
