@@ -1,16 +1,18 @@
 /*!
- * Chart.js
+ * donutClock.js
  * http://chartjs.org/
  *
- * Copyright 2013 Nick Downie
+ * Copyright 2014 Cam Christou
  * Released under the MIT license
- * https://github.com/nnnick/Chart.js/blob/master/LICENSE.md
+ *
+ * Credit to Nick Downie from Chart.js for the basis of significant portions of this code.
+ * This application is purpose-built with some customization options available.
+ * See Documentation
  */
 //Define the global Chart Variable as a class.
 window.Chart = function (context) {
 
     var chart = this;
-
 
     //Easing functions adapted from Robert Penner's easing equations
     //http://www.robertpenner.com/easing/
@@ -123,7 +125,6 @@ window.Chart = function (context) {
     this.donutClock = function (data, options) {
 
         chart.donutClock.defaults = {
-            segmentShowStroke: true,
             mStrokeColor: "#fff",
             hStrokeColor: "#fff",
             segmentStrokeWidth: 2,
@@ -134,20 +135,19 @@ window.Chart = function (context) {
             animateRotate: true,
             animateScale: false,
             onAnimationComplete: null,
-			mcolor	: "#F7464A",
-			hColor	: "#46BFBD",
-			sColor	: "#FDB45C",
-			bgColor	: "rgba(255, 255, 0, 0.5)",
-			hSep	: 3,
-			hHeight	: 10,
-			sSep	: 3,
-			sHeight	:10
+            mcolor: "#F7464A",
+            hColor: "#46BFBD",
+            sColor: "#FDB45C",
+            bgColor: "rgba(255, 255, 0, 0.5)",
+            hSep: 3,
+            hHeight: 10,
+            sSep: 3,
+            sHeight: 10
         };
 
         var config = (options) ? mergeChartConfig(chart.donutClock.defaults, options) : chart.donutClock.defaults;
 
         return new donutClock(data, config, context);
-
     };
 
     var clear = function (c) {
@@ -165,37 +165,35 @@ window.Chart = function (context) {
             donutRadius = Min([donutRadius, config.outerRadius]);
         }
 
+        //make sure data is within allowable ranges
         var cutoutRadius = donutRadius * (config.percentageInnerCutout / 100);
-        while(data.seconds > 60) {
-        	data.seconds -= 60;
-        	data.minutes ++;
+        while (data.seconds > 60) {
+            data.seconds -= 60;
+            data.minutes++;
         }
-        if(data.seconds < 0){
-        	data.seconds = 0; 
+        if (data.seconds < 0) {
+            data.seconds = 0;
         }
-        while(data.minutes > 60) {
-        	data.minutes -= 60;
-        	data.hours ++;
+        while (data.minutes > 60) {
+            data.minutes -= 60;
+            data.hours++;
         }
-        if(data.minutes < 0) {
-        	data.minutes = 0;
+        if (data.minutes < 0) {
+            data.minutes = 0;
         }
-        while(data.hours > 12) {
-        	data.hours -= 12;
+        while (data.hours > 12) {
+            data.hours -= 12;
         }
-        while(data.hours < 1) {
-        	data.hours = 12;
+        while (data.hours < 1) {
+            data.hours = 12;
         }
-        
-        
+
         minuteSegmentTotal = 60;
 
-
         animationLoop(config, null, drawPieSegments, ctx);
-        
 
         function drawPieSegments(animationDecimal) {
-        	var noonAngle = -Math.PI / 2;
+            var noonAngle = -Math.PI / 2;
             var cumulativeAngle = -Math.PI / 2,
                 scaleAnimation = 1,
                 rotateAnimation = 1;
@@ -208,66 +206,60 @@ window.Chart = function (context) {
                 }
             }
 
-				var minuteSegmentAngle = rotateAnimation * ((data.minutes / 60) * (Math.PI * 2));
-				cumulativeAngle = noonAngle;
-				
-				ctx.beginPath();
-				ctx.arc(width / 2, height / 2, scaleAnimation * donutRadius, cumulativeAngle, cumulativeAngle + minuteSegmentAngle, false);
-				ctx.arc(width / 2, height / 2, scaleAnimation * cutoutRadius, cumulativeAngle + minuteSegmentAngle, cumulativeAngle, true);
-				ctx.closePath();
-				ctx.fillStyle = config.mcolor;
-				ctx.fill();
-				ctx.lineWidth = config.segmentStrokeWidth;
-				ctx.strokeStyle = config.mStrokeColor;
-				ctx.stroke();		
-				cumulativeAngle += minuteSegmentAngle;
+            var minuteSegmentAngle = rotateAnimation * ((data.minutes / 60) * (Math.PI * 2));
+            cumulativeAngle = noonAngle;
 
-				minuteSegmentAngle = (((60-data.minutes) / 60) * (Math.PI * 2));
-				ctx.beginPath();
-				ctx.arc(width / 2, height / 2, scaleAnimation * donutRadius, cumulativeAngle, cumulativeAngle + minuteSegmentAngle, false);
-				ctx.arc(width / 2, height / 2, scaleAnimation * cutoutRadius, cumulativeAngle + minuteSegmentAngle, cumulativeAngle, true);
-				ctx.closePath();
-				ctx.fillStyle = config.bgColor;
-				ctx.fill();
-				ctx.lineWidth = config.segmentStrokeWidth;
-				ctx.strokeStyle = config.mStrokeColor;
-				ctx.stroke();		
-				cumulativeAngle += minuteSegmentAngle;
-			
-			
-			
-			//output hour blocks
-			var hourSegmentAngle = rotateAnimation * ((1 / 12) * (Math.PI * 2));
-			cumulativeAngle = noonAngle;
-			for(var h = 0; h < data.hours; h++) {
-				ctx.beginPath();
-				ctx.arc(width / 2, height / 2, scaleAnimation * donutRadius + config.hSep + config.hHeight, cumulativeAngle, cumulativeAngle + hourSegmentAngle, false);
-				ctx.arc(width / 2, height / 2, scaleAnimation * donutRadius + config.hSep, cumulativeAngle + hourSegmentAngle, cumulativeAngle, true);
-				ctx.closePath();
-				ctx.fillStyle = config.hColor;
-				ctx.fill();
-				ctx.lineWidth = config.segmentStrokeWidth;
-				ctx.strokeStyle = config.hStrokeColor;
-				ctx.stroke();		
-				cumulativeAngle += hourSegmentAngle;
-			}
-			
-			//output second bar
-				var secondSegmentAngle = rotateAnimation * ((data.seconds/60) * (Math.PI * 2));
-				cumulativeAngle = noonAngle;
-				ctx.beginPath();
-				ctx.arc(width / 2, height / 2, scaleAnimation * cutoutRadius - config.sSep - config.sHeight, cumulativeAngle, cumulativeAngle + secondSegmentAngle, false);
-				ctx.arc(width / 2, height / 2, scaleAnimation * cutoutRadius - config.sSep, cumulativeAngle + secondSegmentAngle, cumulativeAngle, true);
-				ctx.closePath();
-				ctx.fillStyle = config.sColor;
-				ctx.fill();
-		
+            //output minutes bar
+            ctx.beginPath();
+            ctx.arc(width / 2, height / 2, scaleAnimation * donutRadius, cumulativeAngle, cumulativeAngle + minuteSegmentAngle, false);
+            ctx.arc(width / 2, height / 2, scaleAnimation * cutoutRadius, cumulativeAngle + minuteSegmentAngle, cumulativeAngle, true);
+            ctx.closePath();
+            ctx.fillStyle = config.mcolor;
+            ctx.fill();
+            ctx.lineWidth = config.segmentStrokeWidth;
+            ctx.strokeStyle = config.mStrokeColor;
+            ctx.stroke();
+            cumulativeAngle += minuteSegmentAngle;
+
+            minuteSegmentAngle = (((60 - data.minutes) / 60) * (Math.PI * 2));
+            ctx.beginPath();
+            ctx.arc(width / 2, height / 2, scaleAnimation * donutRadius, cumulativeAngle, cumulativeAngle + minuteSegmentAngle, false);
+            ctx.arc(width / 2, height / 2, scaleAnimation * cutoutRadius, cumulativeAngle + minuteSegmentAngle, cumulativeAngle, true);
+            ctx.closePath();
+            ctx.fillStyle = config.bgColor;
+            ctx.fill();
+            ctx.lineWidth = config.segmentStrokeWidth;
+            ctx.strokeStyle = config.mStrokeColor;
+            ctx.stroke();
+            cumulativeAngle += minuteSegmentAngle;
+
+            //output hour blocks
+            var hourSegmentAngle = rotateAnimation * ((1 / 12) * (Math.PI * 2));
+            cumulativeAngle = noonAngle;
+            for (var h = 0; h < data.hours; h++) {
+                ctx.beginPath();
+                ctx.arc(width / 2, height / 2, scaleAnimation * donutRadius + config.hSep + config.hHeight, cumulativeAngle, cumulativeAngle + hourSegmentAngle, false);
+                ctx.arc(width / 2, height / 2, scaleAnimation * donutRadius + config.hSep, cumulativeAngle + hourSegmentAngle, cumulativeAngle, true);
+                ctx.closePath();
+                ctx.fillStyle = config.hColor;
+                ctx.fill();
+                ctx.lineWidth = config.segmentStrokeWidth;
+                ctx.strokeStyle = config.hStrokeColor;
+                ctx.stroke();
+                cumulativeAngle += hourSegmentAngle;
+            }
+
+            //output seconds bar
+            var secondSegmentAngle = rotateAnimation * ((data.seconds / 60) * (Math.PI * 2));
+            cumulativeAngle = noonAngle;
+            ctx.beginPath();
+            ctx.arc(width / 2, height / 2, scaleAnimation * cutoutRadius - config.sSep - config.sHeight, cumulativeAngle, cumulativeAngle + secondSegmentAngle, false);
+            ctx.arc(width / 2, height / 2, scaleAnimation * cutoutRadius - config.sSep, cumulativeAngle + secondSegmentAngle, cumulativeAngle, true);
+            ctx.closePath();
+            ctx.fillStyle = config.sColor;
+            ctx.fill();
         }
-
-
-
     }
-
 
     function calculateOffset(val, calculatedScale, scaleHop) {
         var outerValue = calculatedScale.steps * calculatedScale.stepValue;
@@ -280,8 +272,6 @@ window.Chart = function (context) {
         var animFrameAmount = (config.animation) ? 1 / CapValue(config.animationSteps, Number.MAX_VALUE, 1) : 1,
             easingFunction = animationOptions[config.animationEasing],
             percentAnimComplete = (config.animation) ? 0 : 1;
-
-
 
         if (typeof drawScale !== "function") drawScale = function () {};
 
@@ -309,13 +299,10 @@ window.Chart = function (context) {
             } else {
                 if (typeof config.onAnimationComplete == "function") config.onAnimationComplete();
             }
-
         }
-
     }
 
     //Declare global functions to be called within this namespace here.
-
 
     // shim layer with setTimeout fallback
     var requestAnimFrame = (function () {
@@ -333,17 +320,11 @@ window.Chart = function (context) {
         var graphMin, graphMax, graphRange, stepValue, numberOfSteps, valueRange, rangeOrderOfMagnitude, decimalNum;
 
         valueRange = maxValue - minValue;
-
         rangeOrderOfMagnitude = calculateOrderOfMagnitude(valueRange);
-
         graphMin = Math.floor(minValue / (1 * Math.pow(10, rangeOrderOfMagnitude))) * Math.pow(10, rangeOrderOfMagnitude);
-
         graphMax = Math.ceil(maxValue / (1 * Math.pow(10, rangeOrderOfMagnitude))) * Math.pow(10, rangeOrderOfMagnitude);
-
         graphRange = graphMax - graphMin;
-
         stepValue = Math.pow(10, rangeOrderOfMagnitude);
-
         numberOfSteps = Math.round(graphRange / stepValue);
 
         //Compare number of steps to the max and min for that size graph, and add in half steps if need be.
@@ -365,14 +346,11 @@ window.Chart = function (context) {
             stepValue: stepValue,
             graphMin: graphMin,
             labels: labels
-
         }
 
         function calculateOrderOfMagnitude(val) {
             return Math.floor(Math.log(val) / Math.LN10);
         }
-
-
     }
 
     //Max value from array
@@ -417,7 +395,6 @@ window.Chart = function (context) {
         } else {
             return 0;
         }
-
     }
 
     function mergeChartConfig(defaults, userDefined) {
